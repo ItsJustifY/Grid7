@@ -1,23 +1,317 @@
 <!doctype html>
-<html><head><meta charset="utf-8"><title>FiveM Browser</title>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src https: data:; style-src 'self' 'unsafe-inline'">
-<link rel="stylesheet" href="style.css"></head>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grid7 | FiveM Roleplay</title>
+<meta name="description" content="Grid7 is a FiveM roleplay server. Download the Grid7 Launcher to join.">
+<meta name="theme-color" content="#071820">
+<link rel="icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,600;1,700;1,800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root{
+  --cyan:#45e5ff;--cyan2:#2bb8d3;--ink:#03161d;--ui:#f4f7f9;--muted:rgba(244,247,249,.62);
+  --row-a:rgba(3,14,20,.74);--row-b:rgba(8,30,40,.6);--teal:rgba(64,168,148,.3);--red:#ff4d5e;--green:#3ee08f;
+  --head:'Bahnschrift','Barlow Condensed','Agency FB','Arial Narrow',sans-serif;
+  --body:'Barlow','Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:#071820;color:var(--ui);font-family:var(--body);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+.h{font-family:var(--head);font-style:italic;font-weight:700;text-transform:uppercase}
+
+/* backdrop - same mesh as the in-game pause menu */
+#bg{position:fixed;inset:0;z-index:-1;opacity:.96;background:
+  radial-gradient(ellipse at 14% 22%,rgba(52,138,124,.62),transparent 55%),
+  radial-gradient(ellipse at 46% 88%,rgba(34,104,140,.55),transparent 60%),
+  radial-gradient(ellipse at 84% 8%,rgba(96,158,108,.42),transparent 52%),
+  radial-gradient(ellipse at 96% 92%,rgba(30,96,120,.5),transparent 55%),
+  linear-gradient(180deg,#0a2430,#071820)}
+#bg::after{content:"";position:absolute;inset:0;opacity:.05;background-image:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px)}
+
+/* tab bar */
+#top{position:sticky;top:0;z-index:20;padding:clamp(12px,2.2vh,26px) clamp(14px,2.4vw,40px) 0;display:flex;align-items:center;gap:14px}
+#top .logo{height:38px;flex:none;margin-right:6px}
+.tabkey{display:grid;place-items:center;width:26px;height:26px;border-radius:3px;background:#f4f7f9;color:#0a0d10;font-style:normal;font-family:var(--head);font-size:15px;font-weight:800;flex:none}
+#tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1 1 auto;min-width:0}
+#tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;height:44px;padding:0 24px;display:grid;place-items:center;font-size:22px;letter-spacing:.01em;color:var(--ui);background:rgba(3,14,20,.72);border:0;cursor:pointer;transition:background .1s,color .1s}
+.tab:hover{background:rgba(255,255,255,.12)}
+.tab.active{background:#fff;color:#0a0d10}
+.dl-top{flex:none;display:inline-flex;align-items:center;height:44px;padding:0 22px;font-size:20px;color:var(--ink);background:linear-gradient(90deg,var(--cyan2),var(--cyan));clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);box-shadow:0 0 18px rgba(69,229,255,.4)}
+.dl-top:hover{filter:brightness(1.12)}
+
+/* stage */
+main{padding:clamp(14px,3vh,34px) clamp(14px,2.4vw,40px) 90px;max-width:1500px;margin:0 auto}
+.view{display:none}.view.active{display:block}
+.split{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:clamp(20px,3vw,50px);align-items:start}
+.section-title{font-size:clamp(26px,3.4vw,42px);margin-bottom:14px;line-height:1}
+.section-title small{display:block;font-family:var(--body);font-style:normal;font-weight:600;font-size:14px;color:var(--cyan);letter-spacing:.2em;margin-bottom:6px}
+
+/* rows - like the pause menu options */
+.rows{display:flex;flex-direction:column;gap:6px}
+.row{position:relative;display:flex;align-items:center;min-height:58px;padding:8px 20px;background:linear-gradient(90deg,var(--row-a),var(--row-b));box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -2px 0 var(--teal);font-size:clamp(20px,2.3vw,28px);cursor:pointer;animation:rowin .32s cubic-bezier(.2,.9,.2,1) backwards;transition:background .08s,color .08s;border:0;color:var(--ui);width:100%;text-align:left}
+@keyframes rowin{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+.row .name{flex:1}
+.row .no{font-family:var(--head);font-size:.7em;opacity:.55;margin-left:12px}
+.row:hover{background:linear-gradient(90deg,rgba(20,55,68,.85),rgba(20,60,74,.7))}
+.row.selected{background:#f2f6f8;color:#080b0e;box-shadow:none}
+.row.selected .no{opacity:.6}
+
+/* preview window with corner brackets */
+.side{position:sticky;top:96px}
+.side h2{font-size:clamp(24px,2.6vw,34px);margin-bottom:12px;line-height:1.05}
+.window{position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,rgba(3,14,20,.85),rgba(9,38,50,.7));border:1px solid rgba(255,255,255,.08);overflow:hidden;display:grid;place-items:center}
+.window .ghost{position:absolute;right:-6%;bottom:-8%;width:62%;opacity:.13;filter:saturate(1.2)}
+.window .big{position:relative;font-size:clamp(46px,7vw,92px);line-height:.9;text-align:center;padding:0 16px;text-shadow:0 0 30px rgba(69,229,255,.4)}
+.window .big em{display:block;font-style:normal;font-family:var(--body);font-weight:600;font-size:14px;letter-spacing:.3em;color:var(--cyan);margin-bottom:8px}
+.live{position:absolute;left:12px;top:10px;display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+.live i{width:9px;height:9px;border-radius:50%;background:var(--red);animation:blink 1.4s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+.br{position:absolute;width:20px;height:20px;border:0 solid var(--cyan)}
+.br.tl{left:-1px;top:-1px;border-width:3px 0 0 3px}.br.tr{right:-1px;top:-1px;border-width:3px 3px 0 0}
+.br.bl{left:-1px;bottom:-1px;border-width:0 0 3px 3px}.br.brr{right:-1px;bottom:-1px;border-width:0 3px 3px 0}
+.side p.desc{margin-top:14px;color:var(--muted);font-size:17px;line-height:1.5;min-height:5.2em}
+
+/* download tab */
+.dl-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(20px,3vw,50px);align-items:start}
+.panel{background:linear-gradient(90deg,var(--row-a),var(--row-b));box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -2px 0 var(--teal);padding:26px 28px}
+.ver{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.ver b{font-size:clamp(50px,7vw,88px);line-height:.9;color:#fff;text-shadow:0 0 28px rgba(69,229,255,.35)}
+.badge{font-size:14px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:4px 12px;background:var(--cyan);color:var(--ink);clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)}
+.meta{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:22px 0}
+.meta div{padding:12px 14px;background:rgba(255,255,255,.05);border-left:3px solid var(--cyan)}
+.meta small{display:block;color:var(--muted);text-transform:uppercase;letter-spacing:.14em;font-size:11px;font-weight:600}
+.meta b{display:block;font-size:22px;margin-top:2px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-size:26px;padding:16px 46px;color:var(--ink);background:linear-gradient(90deg,var(--cyan2),var(--cyan));clip-path:polygon(14px 0,100% 0,calc(100% - 14px) 100%,0 100%);box-shadow:0 0 22px rgba(69,229,255,.5);border:0;cursor:pointer;transition:filter .15s,transform .1s;width:100%}
+.btn:hover{filter:brightness(1.12)}.btn:active{transform:scale(.99)}
+.note{margin-top:14px;color:var(--muted);font-size:14px;line-height:1.5}
+.req{margin-top:18px;display:grid;gap:6px}
+.req div{display:flex;gap:10px;align-items:center;font-size:15px;color:rgba(244,247,249,.85)}
+.req div::before{content:"";width:8px;height:8px;background:var(--green);box-shadow:0 0 8px var(--green);flex:none}
+
+/* mock of the launcher */
+.mock{position:absolute;inset:13% 5% 5%;display:grid;grid-template-columns:22% 1fr;gap:0;background:rgba(3,10,14,.85);border:1px solid rgba(255,255,255,.1);font-size:clamp(7px,1vw,12px)}
+.mock .mnav{padding:8% 8%;border-right:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;gap:6%}
+.mock .mnav img{width:86%;margin-bottom:8%}
+.mock .mnav span{font-family:var(--head);font-style:italic;font-weight:800;text-transform:uppercase;color:var(--muted);padding:3% 6%;letter-spacing:.06em}
+.mock .mnav span.on{color:var(--cyan);border-left:2px solid var(--cyan);background:linear-gradient(90deg,rgba(69,229,255,.16),transparent)}
+.mock .mmain{padding:5%;display:flex;flex-direction:column;gap:4%}
+.mock .hero{flex:1;border:1px solid rgba(255,255,255,.1);background:linear-gradient(110deg,rgba(69,229,255,.14),rgba(255,255,255,.03) 60%);display:flex;justify-content:space-between;align-items:center;padding:4% 5%}
+.mock .hero b{display:block;font-family:var(--head);font-style:italic;font-size:2.6em;text-transform:uppercase;line-height:.95}
+.mock .hero b i{color:var(--cyan);font-style:italic}
+.mock .hero small{display:block;color:var(--green);font-weight:700;letter-spacing:.14em;margin-bottom:.5em;font-size:.9em}
+.mock .play{font-family:var(--head);font-style:italic;font-weight:800;font-size:2em;color:var(--ink);padding:.35em 1.5em;background:linear-gradient(90deg,var(--cyan2),var(--cyan));clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.mock .news{height:26%;display:grid;grid-template-columns:1fr 1fr;gap:3%}
+.mock .news i{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);border-left:2px solid var(--cyan)}
+
+/* changelog */
+.log{margin-top:clamp(24px,4vw,44px)}
+.rel{margin-bottom:8px;background:linear-gradient(90deg,var(--row-a),var(--row-b));box-shadow:inset 0 -2px 0 var(--teal);padding:16px 22px}
+.rel header{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.rel header b{font-size:26px}.rel header time{color:var(--muted);font-size:14px}
+.rel pre{font-family:var(--body);white-space:pre-wrap;color:rgba(244,247,249,.82);font-size:15px;line-height:1.55;margin-top:8px}
+.muted{color:var(--muted)}
+
+/* key hints - like the in-game hint bar */
+#hints{position:fixed;left:0;right:0;bottom:0;z-index:15;display:flex;gap:22px;justify-content:flex-end;align-items:center;padding:12px clamp(14px,2.4vw,40px);background:linear-gradient(0deg,rgba(3,14,20,.92),transparent);pointer-events:none;font-size:15px;font-weight:600;letter-spacing:.04em}
+#hints span{display:flex;gap:8px;align-items:center;color:var(--ui)}
+#hints .tabkey{width:auto;min-width:24px;height:24px;padding:0 6px;font-size:13px}
+
+footer{max-width:1500px;margin:0 auto;padding:0 clamp(14px,2.4vw,40px) 80px;color:var(--muted);font-size:13px}
+
+@media(max-width:900px){
+  .split,.dl-grid{grid-template-columns:1fr}
+  .side{position:static}
+  #top .logo{height:30px}.tab{font-size:18px;padding:0 16px;height:40px}.dl-top{display:none}
+  #top .tabkey{display:none}#hints{display:none}
+  .meta{grid-template-columns:1fr 1fr}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
 <body>
-<header>
-  <h1>FiveM <span>Browser</span></h1>
-  <input id="q" type="search" placeholder="Search name, tags, gametype, map..." autofocus>
-  <select id="locale"><option value="">All languages</option></select>
-  <select id="sort">
-    <option value="players">Most players</option>
-    <option value="name">Name A-Z</option>
-    <option value="free">Most free slots</option>
-  </select>
-  <label><input id="hideEmpty" type="checkbox" checked> Hide empty</label>
-  <label><input id="hideFull" type="checkbox"> Hide full</label>
-  <button id="refresh">Refresh</button>
-</header>
-<div id="status">Loading servers...</div>
-<main id="list"></main>
-<button id="more" hidden>Show more</button>
-<script src="renderer.js"></script>
-</body></html>
+<div id="bg"></div>
+
+<div id="top">
+  <img class="logo" src="logo.svg" alt="Grid7">
+  <i class="tabkey">Q</i>
+  <nav id="tabs" class="h" aria-label="Sections"></nav>
+  <i class="tabkey">E</i>
+  <a class="dl-top h" id="dlTop" href="#download">Download</a>
+</div>
+
+<main id="stage"></main>
+
+<footer>Grid7 is a community server and is not affiliated with or endorsed by Rockstar Games, Take-Two Interactive or Cfx.re.</footer>
+
+<div id="hints"><span><i class="tabkey">Q</i><i class="tabkey">E</i> Switch tab</span><span><i class="tabkey">&uarr;</i><i class="tabkey">&darr;</i> Select</span></div>
+
+<script>
+// ============ EDIT ME ============
+const REPO = "ItsJustifY/Grid7";           // GitHub repo that holds the release
+const ASSET = "Grid7-Launcher.zip";        // release file name
+const FALLBACK = { version: "1.0.0", size: "71 MB" };   // shown until GitHub responds
+// =================================
+
+const TABS = [
+  { id: "launcher", name: "Launcher", kicker: "Grid7 Launcher", rows: [
+    ["Discord Sign-in", "Sign in with Discord in one click. The launcher checks your Whitelist Subscription and never sees your Discord password."],
+    ["One-click Play", "Press PLAY and you are taken straight into Grid7. No server browser and no copying IP addresses."],
+    ["News Feed", "Server news, updates and events land in the launcher, with an unread badge so you never miss one."],
+    ["Live Status", "See whether the server is online before you launch, with slots and ping at a glance."],
+    ["Stays Out of the Way", "The launcher minimises when the game starts, hides FiveM's own window and returns when your session ends."],
+    ["Launcher-only Access", "Grid7 only accepts players who join through the launcher. Direct connects are turned away."],
+  ]},
+  { id: "download", name: "Download", custom: true },
+  { id: "join", name: "How to Join", kicker: "Five steps", rows: [
+    ["1. Get Whitelisted", "Grid7 is whitelist only. You need an active Grid7 Whitelist Subscription before you can join. Your subscription is linked to your Discord account."],
+    ["2. Install FiveM", "Install FiveM from fivem.net. GTA V must be installed on the same PC."],
+    ["3. Open Discord", "Keep the Discord desktop app open and logged in. Grid7 uses it to recognise you when you connect."],
+    ["4. Get the Launcher", "Download the Grid7 Launcher from the Download tab, unzip it and run it. No installation needed."],
+    ["5. Press Play", "Sign in with Discord and press PLAY. The launcher checks your whitelist subscription and, if it is active, hands you over to the game and connects you to Grid7."],
+  ]},
+  { id: "faq", name: "FAQ", kicker: "Questions", rows: [
+    ["Whitelist required?", "Yes. Grid7 is whitelist only, and you need an active Grid7 Whitelist Subscription to join. Your subscription is tied to your Discord account, so sign in with the same account you subscribed with."],
+    ["Sign-in says I am not whitelisted", "Your Discord account does not have an active Whitelist Subscription. Check you signed in with the right Discord account, and that your subscription is active and your role has been applied. If it still fails, contact staff on Discord."],
+    ["Unable to connect?", "If you see \"Unable to connect. Please use Grid7 Launcher.\", you tried to join another way. Open the launcher, sign in with Discord, keep Discord running and press PLAY."],
+    ["Where is Grid7 in FiveM?", "It is a private server and is not in FiveM's public list. Joining is only possible through the Grid7 Launcher."],
+    ["Do I need FiveM?", "Yes. The launcher starts FiveM in the background, so FiveM and GTA V both need to be installed."],
+    ["Is it safe?", "The launcher signs you in via Discord, shows news and status, and starts the game. It never sees your Discord password."],
+    ["Windows SmartScreen warning", "The launcher is not code-signed yet, so Windows may warn the first time. Click More info, then Run anyway."],
+    ["Discord not running", "Open the Discord desktop app (not the website), stay logged in and press PLAY again."],
+  ]},
+];
+
+const $ = (s, r = document) => r.querySelector(s);
+const el = (t, c, txt) => { const e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = txt; return e; };
+let tabIndex = 0, sel = {};
+let release = { version: FALLBACK.version, size: FALLBACK.size, date: null, downloads: null, url: `https://github.com/${REPO}/releases/latest/download/${ASSET}`, all: null, live: false };
+
+/* ---------- build ---------- */
+const tabsEl = $('#tabs'), stage = $('#stage');
+TABS.forEach((t, i) => {
+  const b = el('button', 'tab', t.name); b.onclick = () => goTab(i); tabsEl.append(b);
+  const v = el('section', 'view'); v.id = 'v-' + t.id; stage.append(v);
+  sel[t.id] = 0;
+});
+
+function windowArt(title, kicker) {
+  const w = el('div', 'window');
+  const g = el('img', 'ghost'); g.src = 'logo.svg'; g.alt = ''; w.append(g);
+  const live = el('span', 'live'); live.append(el('i'), document.createTextNode('Grid7')); w.append(live);
+  const big = el('div', 'big h'); big.append(el('em', null, kicker)); big.append(document.createTextNode(title)); w.append(big);
+  ['tl', 'tr', 'bl', 'brr'].forEach((c) => w.append(el('i', 'br ' + c)));
+  return w;
+}
+
+function renderRows(t) {
+  const v = $('#v-' + t.id); v.textContent = '';
+  const split = el('div', 'split');
+  const left = el('div'); const title = el('h1', 'section-title h'); const k = el('small', null, t.kicker); title.append(k, document.createTextNode(t.name)); left.append(title);
+  const rows = el('div', 'rows');
+  t.rows.forEach((r, i) => {
+    const b = el('button', 'row h'); b.append(el('span', 'name', r[0]), el('span', 'no', String(i + 1).padStart(2, '0')));
+    b.style.animationDelay = (i * 25) + 'ms'; b.onmouseenter = () => pick(t, i); b.onclick = () => pick(t, i);
+    rows.append(b);
+  });
+  left.append(rows);
+  const side = el('aside', 'side'); side.append(el('h2', 'h'), el('div', 'artslot'), el('p', 'desc'));
+  split.append(left, side); v.append(split);
+  pick(t, sel[t.id]);
+}
+function pick(t, i) {
+  sel[t.id] = i;
+  const v = $('#v-' + t.id);
+  v.querySelectorAll('.row').forEach((r, n) => r.classList.toggle('selected', n === i));
+  const r = t.rows[i], side = $('.side', v);
+  $('h2', side).textContent = r[0].replace(/^\d+\.\s*/, '');
+  const slot = $('.artslot', side); slot.textContent = ''; slot.append(windowArt(r[0].replace(/^\d+\.\s*/, ''), t.kicker));
+  $('.desc', side).textContent = r[1];
+}
+
+/* ---------- download tab ---------- */
+const fmtDate = (d) => d ? new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+function renderDownload() {
+  const v = $('#v-download'); v.textContent = '';
+  const title = el('h1', 'section-title h'); title.append(el('small', null, 'Windows'), document.createTextNode('Grid7 Launcher')); v.append(title);
+  const grid = el('div', 'dl-grid');
+
+  const panel = el('div', 'panel');
+  const ver = el('div', 'ver');
+  const num = el('b', 'h', 'v' + release.version); num.id = 'verNum';
+  ver.append(num, el('span', 'badge', release.live ? 'Latest' : 'Stable'));
+  panel.append(ver);
+  const meta = el('div', 'meta');
+  [['Released', fmtDate(release.date)], ['File size', release.size], ['Platform', 'Windows 10 / 11 (64-bit)'], ['Downloads', release.downloads == null ? '-' : release.downloads.toLocaleString()]].forEach(([a, b]) => {
+    const d = el('div'); d.append(el('small', null, a), el('b', 'h', b)); meta.append(d);
+  });
+  panel.append(meta);
+  const btn = el('a', 'btn h', 'Download for Windows'); btn.href = release.url; btn.rel = 'noopener'; panel.append(btn);
+  panel.append(el('p', 'note', 'Unzip and run Grid7 Launcher.exe, no installation needed. Windows SmartScreen may warn the first time: click More info, then Run anyway. Do not run it as administrator. A Grid7 Whitelist Subscription is required to join.'));
+  const req = el('div', 'req'); ['Active Grid7 Whitelist Subscription', 'FiveM and GTA V installed', 'Discord desktop app running', 'Windows 10 or 11, 64-bit', 'Internet connection'].forEach((t) => req.append(el('div', null, t))); panel.append(req);
+
+  const side = el('aside', 'side');
+  const w = el('div', 'window');
+  const live = el('span', 'live'); live.append(el('i'), document.createTextNode('Preview')); w.append(live);
+  w.insertAdjacentHTML('beforeend', `<div class="mock"><div class="mnav"><img src="logo.svg" alt=""><span class="on">Home</span><span>News</span><span>Players</span><span>Rules</span></div><div class="mmain"><div class="hero"><div><small>&#9679; SERVER ONLINE</small><b>Enter the <i>Grid</i></b></div><div class="play">PLAY</div></div><div class="news"><i></i><i></i></div></div></div>`);
+  ['tl', 'tr', 'bl', 'brr'].forEach((c) => w.append(el('i', 'br ' + c)));
+  side.append(el('h2', 'h', 'Sign in. Press play.'), w, el('p', 'desc', 'Your one way into Grid7, with news, live status and one-click join.'));
+  grid.append(panel, side); v.append(grid);
+
+  const log = el('div', 'log'); log.append(Object.assign(el('h2', 'section-title h'), { textContent: 'Version history' }));
+  if (release.all && release.all.length) {
+    release.all.forEach((r) => {
+      const d = el('article', 'rel'); const h = el('header'); h.append(el('b', 'h', r.tag_name.replace(/^v/i, 'v')), el('time', null, fmtDate(r.published_at)));
+      if (r.prerelease) h.append(el('span', 'badge', 'Pre-release'));
+      d.append(h, el('pre', null, (r.body || '').trim() || 'No release notes.')); log.append(d);
+    });
+  } else log.append(el('p', 'muted', 'Release notes will appear here once the launcher is published.'));
+  v.append(log);
+}
+
+/* ---------- tabs / keys ---------- */
+function goTab(i) {
+  tabIndex = (i + TABS.length) % TABS.length;
+  tabsEl.querySelectorAll('.tab').forEach((b, n) => b.classList.toggle('active', n === tabIndex));
+  stage.querySelectorAll('.view').forEach((v, n) => v.classList.toggle('active', n === tabIndex));
+  const t = TABS[tabIndex]; if (!t.custom && !$('#v-' + t.id).children.length) renderRows(t);
+  history.replaceState(null, '', '#' + t.id); window.scrollTo({ top: 0 });
+  tabsEl.querySelectorAll('.tab')[tabIndex].scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key.toLowerCase(), t = TABS[tabIndex];
+  if (k === 'q') goTab(tabIndex - 1); else if (k === 'e') goTab(tabIndex + 1);
+  else if (!t.custom && (k === 'arrowdown' || k === 'arrowup')) { e.preventDefault(); pick(t, (sel[t.id] + (k === 'arrowdown' ? 1 : -1) + t.rows.length) % t.rows.length); }
+});
+$('#dlTop').onclick = (e) => { e.preventDefault(); goTab(TABS.findIndex((t) => t.id === 'download')); };
+addEventListener('hashchange', () => { const i = TABS.findIndex((t) => '#' + t.id === location.hash); if (i >= 0 && i !== tabIndex) goTab(i); });
+
+/* ---------- GitHub release info ---------- */
+async function loadRelease() {
+  try {
+    const list = await (await fetch(`https://api.github.com/repos/${REPO}/releases`, { headers: { Accept: 'application/vnd.github+json' } })).json();
+    const rels = Array.isArray(list) ? list.filter((r) => !r.draft) : [];
+    if (!rels.length) return;
+    const r = rels.find((x) => !x.prerelease) || rels[0];
+    const a = (r.assets || []).find((x) => x.name === ASSET) || (r.assets || [])[0];
+    release = {
+      version: r.tag_name.replace(/^v/i, ''), date: r.published_at,
+      size: a ? (a.size / 1048576).toFixed(0) + ' MB' : FALLBACK.size,
+      downloads: a ? a.download_count : null,
+      url: a ? a.browser_download_url : release.url, all: rels, live: true,
+    };
+    renderDownload();
+  } catch { /* offline or rate limited: keep the fallback */ }
+}
+
+renderDownload();
+const start = TABS.findIndex((t) => '#' + t.id === location.hash);
+goTab(start >= 0 ? start : 0);
+loadRelease();
+</script>
+</body>
+</html>

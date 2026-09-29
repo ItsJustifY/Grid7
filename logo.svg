@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 236 80" width="236" height="80" role="img" aria-label="Grid7">
+    <title>Grid7</title>
+
+    <!-- The 7: big, slanted, and behind the word -->
+    <g transform="translate(118 4) skewX(-12)">
+        <polygon points="0,0 84,0 84,17 40,74 19,74 61,17 0,17" fill="#45e5ff"/>
+        <!-- a highlight along the top edge of the bar -->
+        <polygon points="0,0 84,0 84,4 0,4" fill="#ffffff" opacity="0.35"/>
+    </g>
+
+    <!-- GRID: in front, with a dark edge so it stays sharp over the 7 -->
+    <text x="8" y="58" textLength="168" lengthAdjust="spacingAndGlyphs"
+          font-family="Bahnschrift, 'Agency FB', 'Arial Narrow', 'Segoe UI', sans-serif"
+          font-size="58" font-weight="800" font-style="italic"
+          fill="#f4f7f9" stroke="#03161d" stroke-width="5" stroke-linejoin="round" paint-order="stroke fill">GRID</text>
+</svg>
