@@ -1,0 +1,23 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>FiveM Browser</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src https: data:; style-src 'self' 'unsafe-inline'">
+<link rel="stylesheet" href="style.css"></head>
+<body>
+<header>
+  <h1>FiveM <span>Browser</span></h1>
+  <input id="q" type="search" placeholder="Search name, tags, gametype, map..." autofocus>
+  <select id="locale"><option value="">All languages</option></select>
+  <select id="sort">
+    <option value="players">Most players</option>
+    <option value="name">Name A-Z</option>
+    <option value="free">Most free slots</option>
+  </select>
+  <label><input id="hideEmpty" type="checkbox" checked> Hide empty</label>
+  <label><input id="hideFull" type="checkbox"> Hide full</label>
+  <button id="refresh">Refresh</button>
+</header>
+<div id="status">Loading servers...</div>
+<main id="list"></main>
+<button id="more" hidden>Show more</button>
+<script src="renderer.js"></script>
+</body></html>
